@@ -148,6 +148,32 @@ const AttendancePage = () => {
 
   const stats = calculateStats();
 
+  // Helper function to render status indicator
+  const renderStatusIndicator = (status) => {
+    if (status === true) {
+      return (
+        <View style={styles.statusBadge}>
+          <View style={[styles.statusIndicator, styles.presentIndicator]} />
+          <Text style={styles.statusText}>Present</Text>
+        </View>
+      );
+    } else if (status === false) {
+      return (
+        <View style={styles.statusBadge}>
+          <View style={[styles.statusIndicator, styles.absentIndicator]} />
+          <Text style={styles.statusText}>Absent</Text>
+        </View>
+      );
+    } else {
+      return (
+        <View style={styles.statusBadge}>
+          <View style={[styles.statusIndicator, styles.unmarkedIndicator]} />
+          <Text style={styles.statusText}>Unmarked</Text>
+        </View>
+      );
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor="#1a237e" barStyle="light-content" />
@@ -182,16 +208,35 @@ const AttendancePage = () => {
         <View style={[styles.statCard, styles.presentCard]}>
           <Text style={styles.statNumber}>{stats.present}</Text>
           <Text style={styles.statLabel}>Present</Text>
+          <View style={[styles.indicatorDot, styles.presentDot]} />
         </View>
         
         <View style={[styles.statCard, styles.absentCard]}>
           <Text style={styles.statNumber}>{stats.absent}</Text>
           <Text style={styles.statLabel}>Absent</Text>
+          <View style={[styles.indicatorDot, styles.absentDot]} />
         </View>
         
         <View style={[styles.statCard, styles.unmarkedCard]}>
           <Text style={styles.statNumber}>{stats.unmarked}</Text>
           <Text style={styles.statLabel}>Unmarked</Text>
+          <View style={[styles.indicatorDot, styles.unmarkedDot]} />
+        </View>
+      </View>
+      
+      {/* Legend for status indicators */}
+      <View style={styles.legendContainer}>
+        <View style={styles.legendItem}>
+          <View style={[styles.legendDot, styles.presentDot]} />
+          <Text style={styles.legendText}>Present</Text>
+        </View>
+        <View style={styles.legendItem}>
+          <View style={[styles.legendDot, styles.absentDot]} />
+          <Text style={styles.legendText}>Absent</Text>
+        </View>
+        <View style={styles.legendItem}>
+          <View style={[styles.legendDot, styles.unmarkedDot]} />
+          <Text style={styles.legendText}>Unmarked</Text>
         </View>
       </View>
       
@@ -258,40 +303,55 @@ const AttendancePage = () => {
               </Text>
             </View>
           ) : (
-            filteredEmployees.map(employee => (
-              <View key={employee.id} style={styles.employeeCard}>
-                <View style={styles.employeeInfo}>
-                  <Text style={styles.employeeName}>{employee.name}</Text>
-                  <Text style={styles.employeeDetails}>
-                    {employee.role} • {employee.department}
-                  </Text>
-                </View>
-                
-                <View style={styles.attendanceButtons}>
-                  <TouchableOpacity
-                    style={[
-                      styles.attendanceButton,
-                      styles.presentButton,
-                      getAttendanceStatus(employee.id) === true ? styles.presentActive : null
-                    ]}
-                    onPress={() => markAttendance(employee.id, true)}
-                  >
-                    <Icon name="✓" size={16} color={getAttendanceStatus(employee.id) === true ? "#fff" : "#2e7d32"} />
-                  </TouchableOpacity>
+            filteredEmployees.map(employee => {
+              const attendanceStatus = getAttendanceStatus(employee.id);
+              let cardStyle = styles.employeeCard;
+              
+              // Add color indicators based on attendance status
+              if (attendanceStatus === true) {
+                cardStyle = {...cardStyle, ...styles.presentEmployeeCard};
+              } else if (attendanceStatus === false) {
+                cardStyle = {...cardStyle, ...styles.absentEmployeeCard};
+              } else {
+                cardStyle = {...cardStyle, ...styles.unmarkedEmployeeCard};
+              }
+              
+              return (
+                <View key={employee.id} style={cardStyle}>
+                  <View style={styles.employeeInfo}>
+                    <Text style={styles.employeeName}>{employee.name}</Text>
+                    <Text style={styles.employeeDetails}>
+                      {employee.role} • {employee.department}
+                    </Text>
+                    {renderStatusIndicator(attendanceStatus)}
+                  </View>
                   
-                  <TouchableOpacity
-                    style={[
-                      styles.attendanceButton,
-                      styles.absentButton,
-                      getAttendanceStatus(employee.id) === false ? styles.absentActive : null
-                    ]}
-                    onPress={() => markAttendance(employee.id, false)}
-                  >
-                    <Icon name="✗" size={16} color={getAttendanceStatus(employee.id) === false ? "#fff" : "#c62828"} />
-                  </TouchableOpacity>
+                  <View style={styles.attendanceButtons}>
+                    <TouchableOpacity
+                      style={[
+                        styles.attendanceButton,
+                        styles.presentButton,
+                        attendanceStatus === true ? styles.presentActive : null
+                      ]}
+                      onPress={() => markAttendance(employee.id, true)}
+                    >
+                      <Icon name="✓" size={16} color={attendanceStatus === true ? "#fff" : "#2e7d32"} />
+                    </TouchableOpacity>
+                    
+                    <TouchableOpacity
+                      style={[
+                        styles.attendanceButton,
+                        styles.absentButton,
+                        attendanceStatus === false ? styles.absentActive : null
+                      ]}
+                      onPress={() => markAttendance(employee.id, false)}
+                    >
+                      <Icon name="✗" size={16} color={attendanceStatus === false ? "#fff" : "#c62828"} />
+                    </TouchableOpacity>
+                  </View>
                 </View>
-              </View>
-            ))
+              );
+            })
           )}
           
           <View style={styles.bottomSpacer} />
@@ -376,6 +436,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     padding: 16,
+    paddingBottom: 8,
   },
   statCard: {
     flex: 1,
@@ -384,6 +445,8 @@ const styles = StyleSheet.create({
     padding: 16,
     marginHorizontal: 4,
     alignItems: 'center',
+    position: 'relative',
+    overflow: 'hidden',
     ...Platform.select({
       ios: {
         shadowColor: '#000',
@@ -408,13 +471,50 @@ const styles = StyleSheet.create({
     borderTopColor: '#f57c00',
     borderTopWidth: 3,
   },
+  indicatorDot: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  presentDot: {
+    backgroundColor: '#2e7d32',
+  },
+  absentDot: {
+    backgroundColor: '#c62828',
+  },
+  unmarkedDot: {
+    backgroundColor: '#f57c00',
+  },
   statNumber: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 4,
-    color:'#808080'
+    color:"#808080",
   },
   statLabel: {
+    fontSize: 12,
+    color: '#666',
+  },
+  legendContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    paddingBottom: 8,
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 8,
+  },
+  legendDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginRight: 4,
+  },
+  legendText: {
     fontSize: 12,
     color: '#666',
   },
@@ -513,6 +613,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    borderLeftWidth: 4,
+    borderLeftColor: '#e0e0e0',
     ...Platform.select({
       ios: {
         shadowColor: '#000',
@@ -524,6 +626,18 @@ const styles = StyleSheet.create({
         elevation: 1,
       },
     }),
+  },
+  presentEmployeeCard: {
+    borderLeftColor: '#2e7d32',
+    backgroundColor: 'rgba(46, 125, 50, 0.05)',
+  },
+  absentEmployeeCard: {
+    borderLeftColor: '#c62828',
+    backgroundColor: 'rgba(198, 40, 40, 0.05)',
+  },
+  unmarkedEmployeeCard: {
+    borderLeftColor: '#f57c00',
+    backgroundColor: 'rgba(245, 124, 0, 0.05)',
   },
   employeeInfo: {
     flex: 1,
@@ -537,6 +651,30 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     marginTop: 2,
+  },
+  statusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  statusIndicator: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: 6,
+  },
+  presentIndicator: {
+    backgroundColor: '#2e7d32',
+  },
+  absentIndicator: {
+    backgroundColor: '#c62828',
+  },
+  unmarkedIndicator: {
+    backgroundColor: '#f57c00',
+  },
+  statusText: {
+    fontSize: 12,
+    fontWeight: '500',
   },
   attendanceButtons: {
     flexDirection: 'row',
