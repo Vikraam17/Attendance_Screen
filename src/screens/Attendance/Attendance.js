@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -11,32 +11,39 @@ import {
   ActivityIndicator,
   Platform,
 } from 'react-native';
-import { format } from 'date-fns';
+import {format} from 'date-fns';
 
 // Icons would be imported from a library like react-native-vector-icons
 // This is a placeholder implementation for the example
-const Icon = ({ name, size = 24, color = '#000' }) => (
-  <Text style={{ fontSize: size, color }}>{name}</Text>
+const Icon = ({name, size = 24, color = '#000'}) => (
+  <Text style={{fontSize: size, color}}>{name}</Text>
 );
 
 const AttendancePage = () => {
   // State for managing loading states
   const [isLoading, setIsLoading] = useState(false);
   const [savingData, setSavingData] = useState(false);
-  
+
   // Current date state
   const [currentDate, setCurrentDate] = useState(new Date());
-  
+
   // Search and filter states
   const [searchQuery, setSearchQuery] = useState('');
   const [departmentFilter, setDepartmentFilter] = useState('All');
-  
+
   // Employees and attendance data
   const [employees, setEmployees] = useState([]);
   const [attendanceData, setAttendanceData] = useState({});
-  
+
   // Departments for the filter
-  const departments = ['All', 'Engineering', 'Marketing', 'HR', 'Finance', 'Operations'];
+  const departments = [
+    'All',
+    'Engineering',
+    'Marketing',
+    'HR',
+    'Finance',
+    'Operations',
+  ];
 
   // Fetch employees effect - simulated
   useEffect(() => {
@@ -44,23 +51,63 @@ const AttendancePage = () => {
       setIsLoading(true);
       // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 600));
-      
+
       // Sample employee data - in a real app, this would come from an API
       setEmployees([
-        { id: 1, name: 'John Doe', department: 'Engineering', role: 'Software Developer' },
-        { id: 2, name: 'Jane Smith', department: 'Marketing', role: 'Marketing Specialist' },
-        { id: 3, name: 'Robert Johnson', department: 'HR', role: 'HR Manager' },
-        { id: 4, name: 'Emily Davis', department: 'Finance', role: 'Financial Analyst' },
-        { id: 5, name: 'Michael Wilson', department: 'Operations', role: 'Operations Director' },
-        { id: 6, name: 'Sarah Brown', department: 'Engineering', role: 'QA Engineer' },
-        { id: 7, name: 'David Miller', department: 'Marketing', role: 'Content Strategist' },
-        { id: 8, name: 'Lisa Anderson', department: 'HR', role: 'Recruiter' },
-        { id: 9, name: 'James Taylor', department: 'Finance', role: 'Accountant' },
-        { id: 10, name: 'Jennifer Thomas', department: 'Operations', role: 'Project Manager' },
+        {
+          id: 1,
+          name: 'John Doe',
+          department: 'Engineering',
+          role: 'Software Developer',
+        },
+        {
+          id: 2,
+          name: 'Jane Smith',
+          department: 'Marketing',
+          role: 'Marketing Specialist',
+        },
+        {id: 3, name: 'Robert Johnson', department: 'HR', role: 'HR Manager'},
+        {
+          id: 4,
+          name: 'Emily Davis',
+          department: 'Finance',
+          role: 'Financial Analyst',
+        },
+        {
+          id: 5,
+          name: 'Michael Wilson',
+          department: 'Operations',
+          role: 'Operations Director',
+        },
+        {
+          id: 6,
+          name: 'Sarah Brown',
+          department: 'Engineering',
+          role: 'QA Engineer',
+        },
+        {
+          id: 7,
+          name: 'David Miller',
+          department: 'Marketing',
+          role: 'Content Strategist',
+        },
+        {id: 8, name: 'Lisa Anderson', department: 'HR', role: 'Recruiter'},
+        {
+          id: 9,
+          name: 'James Taylor',
+          department: 'Finance',
+          role: 'Accountant',
+        },
+        {
+          id: 10,
+          name: 'Jennifer Thomas',
+          department: 'Operations',
+          role: 'Project Manager',
+        },
       ]);
       setIsLoading(false);
     };
-    
+
     fetchEmployees();
   }, []);
 
@@ -74,13 +121,13 @@ const AttendancePage = () => {
       });
       setAttendanceData({
         ...attendanceData,
-        [dateKey]: initialData
+        [dateKey]: initialData,
       });
     }
   }, [currentDate, employees]);
 
   // Change date handler
-  const changeDate = (days) => {
+  const changeDate = days => {
     const newDate = new Date(currentDate);
     newDate.setDate(newDate.getDate() + days);
     setCurrentDate(newDate);
@@ -93,23 +140,27 @@ const AttendancePage = () => {
       ...attendanceData,
       [dateKey]: {
         ...attendanceData[dateKey],
-        [employeeId]: status
-      }
+        [employeeId]: status,
+      },
     };
     setAttendanceData(updatedAttendance);
   };
 
   // Filter employees based on search query and department filter
-  const filteredEmployees = employees.filter(employee => 
-    (employee.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-     employee.role.toLowerCase().includes(searchQuery.toLowerCase())) &&
-    (departmentFilter === 'All' || employee.department === departmentFilter)
+  const filteredEmployees = employees.filter(
+    employee =>
+      (employee.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        employee.role.toLowerCase().includes(searchQuery.toLowerCase())) &&
+      (departmentFilter === 'All' || employee.department === departmentFilter),
   );
 
   // Get attendance status for an employee on current date
-  const getAttendanceStatus = (employeeId) => {
+  const getAttendanceStatus = employeeId => {
     const dateKey = format(currentDate, 'yyyy-MM-dd');
-    if (attendanceData[dateKey] && attendanceData[dateKey][employeeId] !== null) {
+    if (
+      attendanceData[dateKey] &&
+      attendanceData[dateKey][employeeId] !== null
+    ) {
       return attendanceData[dateKey][employeeId];
     }
     return null;
@@ -119,37 +170,40 @@ const AttendancePage = () => {
   const saveAttendance = async () => {
     const dateKey = format(currentDate, 'yyyy-MM-dd');
     setSavingData(true);
-    
+
     // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 800));
-    
+
     // In a real app, this would save to a database or API
     console.log('Attendance data saved:', attendanceData[dateKey]);
-    
+
     setSavingData(false);
   };
 
   // Calculate attendance statistics
   const calculateStats = () => {
     const dateKey = format(currentDate, 'yyyy-MM-dd');
-    if (!attendanceData[dateKey]) return { present: 0, absent: 0, unmarked: employees.length };
-    
-    let present = 0, absent = 0, unmarked = 0;
-    
+    if (!attendanceData[dateKey])
+      return {present: 0, absent: 0, unmarked: employees.length};
+
+    let present = 0,
+      absent = 0,
+      unmarked = 0;
+
     employees.forEach(emp => {
       const status = attendanceData[dateKey][emp.id];
       if (status === true) present++;
       else if (status === false) absent++;
       else unmarked++;
     });
-    
-    return { present, absent, unmarked };
+
+    return {present, absent, unmarked};
   };
 
   const stats = calculateStats();
 
   // Helper function to render status indicator
-  const renderStatusIndicator = (status) => {
+  const renderStatusIndicator = status => {
     if (status === true) {
       return (
         <View style={styles.statusBadge}>
@@ -177,7 +231,7 @@ const AttendancePage = () => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor="#1a237e" barStyle="light-content" />
-      
+
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerTop}>
@@ -186,23 +240,29 @@ const AttendancePage = () => {
             <Text style={styles.reportButtonText}>Reports</Text>
           </TouchableOpacity>
         </View>
-        
+
         <View style={styles.dateSection}>
-          <TouchableOpacity onPress={() => changeDate(-1)} style={styles.dateArrow}>
+          <TouchableOpacity
+            onPress={() => changeDate(-1)}
+            style={styles.dateArrow}>
             <Icon name="←" size={18} color="#fff" />
           </TouchableOpacity>
-          
+
           <View style={styles.dateDisplay}>
-            <Text style={styles.currentDateText}>{format(currentDate, 'MMMM d, yyyy')}</Text>
+            <Text style={styles.currentDateText}>
+              {format(currentDate, 'MMMM d, yyyy')}
+            </Text>
             <Text style={styles.dayText}>{format(currentDate, 'EEEE')}</Text>
           </View>
-          
-          <TouchableOpacity onPress={() => changeDate(1)} style={styles.dateArrow}>
+
+          <TouchableOpacity
+            onPress={() => changeDate(1)}
+            style={styles.dateArrow}>
             <Icon name="→" size={18} color="#fff" />
           </TouchableOpacity>
         </View>
       </View>
-      
+
       {/* Stats Cards */}
       <View style={styles.statsContainer}>
         <View style={[styles.statCard, styles.presentCard]}>
@@ -210,20 +270,20 @@ const AttendancePage = () => {
           <Text style={styles.statLabel}>Present</Text>
           <View style={[styles.indicatorDot, styles.presentDot]} />
         </View>
-        
+
         <View style={[styles.statCard, styles.absentCard]}>
           <Text style={styles.statNumber}>{stats.absent}</Text>
           <Text style={styles.statLabel}>Absent</Text>
           <View style={[styles.indicatorDot, styles.absentDot]} />
         </View>
-        
+
         <View style={[styles.statCard, styles.unmarkedCard]}>
           <Text style={styles.statNumber}>{stats.unmarked}</Text>
           <Text style={styles.statLabel}>Unmarked</Text>
           <View style={[styles.indicatorDot, styles.unmarkedDot]} />
         </View>
       </View>
-      
+
       {/* Legend for status indicators */}
       <View style={styles.legendContainer}>
         <View style={styles.legendItem}>
@@ -239,7 +299,7 @@ const AttendancePage = () => {
           <Text style={styles.legendText}>Unmarked</Text>
         </View>
       </View>
-      
+
       {/* Search and Filter */}
       <View style={styles.actionBar}>
         <View style={styles.searchContainer}>
@@ -257,35 +317,34 @@ const AttendancePage = () => {
             </TouchableOpacity>
           ) : null}
         </View>
-        
-        <ScrollView 
-          horizontal 
-          showsHorizontalScrollIndicator={false} 
+
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
           style={styles.filterScrollView}
-          contentContainerStyle={styles.filterContainer}
-        >
+          contentContainerStyle={styles.filterContainer}>
           {departments.map(dept => (
             <TouchableOpacity
               key={dept}
               style={[
                 styles.filterChip,
-                departmentFilter === dept ? styles.filterChipActive : null
+                departmentFilter === dept ? styles.filterChipActive : null,
               ]}
-              onPress={() => setDepartmentFilter(dept)}
-            >
-              <Text 
+              onPress={() => setDepartmentFilter(dept)}>
+              <Text
                 style={[
                   styles.filterChipText,
-                  departmentFilter === dept ? styles.filterChipTextActive : null
-                ]}
-              >
+                  departmentFilter === dept
+                    ? styles.filterChipTextActive
+                    : null,
+                ]}>
                 {dept}
               </Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
       </View>
-      
+
       {/* Employee List */}
       {isLoading ? (
         <View style={styles.loadingContainer}>
@@ -306,7 +365,7 @@ const AttendancePage = () => {
             filteredEmployees.map(employee => {
               const attendanceStatus = getAttendanceStatus(employee.id);
               let cardStyle = styles.employeeCard;
-              
+
               // Add color indicators based on attendance status
               if (attendanceStatus === true) {
                 cardStyle = {...cardStyle, ...styles.presentEmployeeCard};
@@ -315,7 +374,7 @@ const AttendancePage = () => {
               } else {
                 cardStyle = {...cardStyle, ...styles.unmarkedEmployeeCard};
               }
-              
+
               return (
                 <View key={employee.id} style={cardStyle}>
                   <View style={styles.employeeInfo}>
@@ -325,46 +384,51 @@ const AttendancePage = () => {
                     </Text>
                     {renderStatusIndicator(attendanceStatus)}
                   </View>
-                  
+
                   <View style={styles.attendanceButtons}>
                     <TouchableOpacity
                       style={[
                         styles.attendanceButton,
                         styles.presentButton,
-                        attendanceStatus === true ? styles.presentActive : null
+                        attendanceStatus === true ? styles.presentActive : null,
                       ]}
-                      onPress={() => markAttendance(employee.id, true)}
-                    >
-                      <Icon name="✓" size={16} color={attendanceStatus === true ? "#fff" : "#2e7d32"} />
+                      onPress={() => markAttendance(employee.id, true)}>
+                      <Icon
+                        name="✓"
+                        size={16}
+                        color={attendanceStatus === true ? '#fff' : '#2e7d32'}
+                      />
                     </TouchableOpacity>
-                    
+
                     <TouchableOpacity
                       style={[
                         styles.attendanceButton,
                         styles.absentButton,
-                        attendanceStatus === false ? styles.absentActive : null
+                        attendanceStatus === false ? styles.absentActive : null,
                       ]}
-                      onPress={() => markAttendance(employee.id, false)}
-                    >
-                      <Icon name="✗" size={16} color={attendanceStatus === false ? "#fff" : "#c62828"} />
+                      onPress={() => markAttendance(employee.id, false)}>
+                      <Icon
+                        name="✗"
+                        size={16}
+                        color={attendanceStatus === false ? '#fff' : '#c62828'}
+                      />
                     </TouchableOpacity>
                   </View>
                 </View>
               );
             })
           )}
-          
+
           <View style={styles.bottomSpacer} />
         </ScrollView>
       )}
-      
+
       {/* Save Button */}
       <View style={styles.footerContainer}>
-        <TouchableOpacity 
-          style={styles.saveButton} 
+        <TouchableOpacity
+          style={styles.saveButton}
           onPress={saveAttendance}
-          disabled={savingData}
-        >
+          disabled={savingData}>
           {savingData ? (
             <ActivityIndicator size="small" color="#fff" />
           ) : (
@@ -450,7 +514,7 @@ const styles = StyleSheet.create({
     ...Platform.select({
       ios: {
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
+        shadowOffset: {width: 0, height: 2},
         shadowOpacity: 0.1,
         shadowRadius: 3,
       },
@@ -492,7 +556,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 4,
-    color:"#808080",
+    color: '#808080',
   },
   statLabel: {
     fontSize: 12,
@@ -532,7 +596,7 @@ const styles = StyleSheet.create({
     ...Platform.select({
       ios: {
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
+        shadowOffset: {width: 0, height: 1},
         shadowOpacity: 0.1,
         shadowRadius: 2,
       },
@@ -618,7 +682,7 @@ const styles = StyleSheet.create({
     ...Platform.select({
       ios: {
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
+        shadowOffset: {width: 0, height: 1},
         shadowOpacity: 0.1,
         shadowRadius: 2,
       },
@@ -675,6 +739,7 @@ const styles = StyleSheet.create({
   statusText: {
     fontSize: 12,
     fontWeight: '500',
+    color: '#666',
   },
   attendanceButtons: {
     flexDirection: 'row',
@@ -718,7 +783,7 @@ const styles = StyleSheet.create({
     ...Platform.select({
       ios: {
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: -2 },
+        shadowOffset: {width: 0, height: -2},
         shadowOpacity: 0.1,
         shadowRadius: 3,
       },
